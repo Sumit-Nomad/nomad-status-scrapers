@@ -1,0 +1,33 @@
+name: Refresh Atlas store status
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+# A run in progress is allowed to finish; the next one queues behind it (GitHub keeps one
+# pending run), so a slow run is never cancelled just before it posts.
+concurrency:
+  group: refresh-atlas-status
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+      - name: Scrape Atlas and post store status
+        env:
+          DASHBOARD_URL: ${{ secrets.DASHBOARD_URL }}
+          DASHBOARD_INGEST_KEY: ${{ secrets.DASHBOARD_INGEST_KEY }}
+          WEBHOOK_URL: ${{ secrets.NOMAD_STATUS_WEBHOOK_URL }}
+          WEBHOOK_TOKEN: ${{ secrets.NOMAD_STATUS_WEBHOOK_TOKEN }}
+        run: python refresh_atlas_status.py

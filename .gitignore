@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.venv/
+*.png
+atlas_storage_state*
+swiggy_storage_state*
+*.b64

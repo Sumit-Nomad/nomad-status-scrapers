@@ -1,0 +1,25 @@
+name: Refresh Zomato data
+
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-zomato
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch Zomato and upload to the dashboard
+        env:
+          INGEST_URL: ${{ secrets.DASHBOARD_URL }}
+          INGEST_KEY: ${{ secrets.DASHBOARD_INGEST_KEY }}
+        run: python refresh_zomato.py

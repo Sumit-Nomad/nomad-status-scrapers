@@ -1,0 +1,29 @@
+name: Refresh Swiggy data
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: refresh-swiggy
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+      - name: Fetch Swiggy menus and status and upload to the dashboard
+        env:
+          INGEST_URL: ${{ secrets.DASHBOARD_URL }}
+          INGEST_KEY: ${{ secrets.DASHBOARD_INGEST_KEY }}
+        run: python refresh_swiggy.py
