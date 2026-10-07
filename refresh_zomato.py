@@ -238,7 +238,8 @@ def main():
             if attempt == 3:
                 raise
             time.sleep(20 * (attempt + 1))
-    print("upload reply:", reply[:300])
+    import re as _re
+    print("upload reply:", _re.sub(r"<[^>]+>|\s+", " ", reply)[-300:] if reply.lstrip().startswith("<") else reply[:300])
     return 0 if '"ok":true' in reply.replace(" ", "") else 1
 
 
